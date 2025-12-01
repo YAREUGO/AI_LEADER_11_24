@@ -46,6 +46,7 @@ export function LandingPage() {
   const [mounted, setMounted] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
   const { scrollY } = useScroll();
+  const hasClerkKey = !!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
 
   // Parallax effects
   const heroY = useTransform(scrollY, [0, 1000], [0, 200]);
@@ -202,27 +203,31 @@ export function LandingPage() {
                 )}
               </AnimatePresence>
             </div>
-            <SignedOut>
-              <SignInButton mode="modal">
-                <button className="hidden md:flex items-center gap-2 bg-white/5 hover:bg-white/10 text-white px-4 py-2 rounded-full text-sm font-medium transition-all border border-white/10 hover:border-white/20 backdrop-blur-sm">
-                  로그인
-                </button>
-              </SignInButton>
-              <SignUpButton mode="modal">
-                <button className="hidden md:flex items-center gap-2 bg-[#2A9D8F] hover:bg-[#21867a] text-white px-4 py-2 rounded-full text-sm font-medium transition-all">
-                  회원가입
-                </button>
-              </SignUpButton>
-            </SignedOut>
-            <SignedIn>
-              <UserButton
-                appearance={{
-                  elements: {
-                    avatarBox: "w-10 h-10",
-                  },
-                }}
-              />
-            </SignedIn>
+            {hasClerkKey ? (
+              <>
+                <SignedOut>
+                  <SignInButton mode="modal">
+                    <button className="hidden md:flex items-center gap-2 bg-white/5 hover:bg-white/10 text-white px-4 py-2 rounded-full text-sm font-medium transition-all border border-white/10 hover:border-white/20 backdrop-blur-sm">
+                      로그인
+                    </button>
+                  </SignInButton>
+                  <SignUpButton mode="modal">
+                    <button className="hidden md:flex items-center gap-2 bg-[#2A9D8F] hover:bg-[#21867a] text-white px-4 py-2 rounded-full text-sm font-medium transition-all">
+                      회원가입
+                    </button>
+                  </SignUpButton>
+                </SignedOut>
+                <SignedIn>
+                  <UserButton
+                    appearance={{
+                      elements: {
+                        avatarBox: "w-10 h-10",
+                      },
+                    }}
+                  />
+                </SignedIn>
+              </>
+            ) : null}
             <button
               onClick={openModal}
               className="hidden md:flex items-center gap-2 bg-white/5 hover:bg-white/10 text-white px-6 py-2.5 rounded-full text-sm font-medium transition-all border border-white/10 hover:border-white/20 backdrop-blur-sm"
