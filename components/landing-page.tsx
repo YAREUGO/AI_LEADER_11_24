@@ -27,13 +27,8 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Slider } from "@/components/ui/slider";
-import {
-  SignInButton,
-  SignUpButton,
-  SignedIn,
-  SignedOut,
-  UserButton,
-} from "@clerk/nextjs";
+// Clerk는 환경 변수가 있을 때만 동적 import
+const CLERK_PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
 
 export function LandingPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -44,9 +39,31 @@ export function LandingPage() {
   const [volume, setVolume] = useState([15]);
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [ClerkComponents, setClerkComponents] = useState<{
+    SignInButton: any;
+    SignUpButton: any;
+    SignedIn: any;
+    SignedOut: any;
+    UserButton: any;
+  } | null>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
   const { scrollY } = useScroll();
-  const hasClerkKey = !!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
+  const hasClerkKey = !!CLERK_PUBLISHABLE_KEY;
+
+  // Clerk 컴포넌트 동적 로드
+  useEffect(() => {
+    if (hasClerkKey && typeof window !== "undefined") {
+      import("@clerk/nextjs").then((clerk) => {
+        setClerkComponents({
+          SignInButton: clerk.SignInButton,
+          SignUpButton: clerk.SignUpButton,
+          SignedIn: clerk.SignedIn,
+          SignedOut: clerk.SignedOut,
+          UserButton: clerk.UserButton,
+        });
+      });
+    }
+  }, [hasClerkKey]);
 
   // Parallax effects
   const heroY = useTransform(scrollY, [0, 1000], [0, 200]);
@@ -203,29 +220,29 @@ export function LandingPage() {
                 )}
               </AnimatePresence>
             </div>
-            {hasClerkKey ? (
+            {hasClerkKey && ClerkComponents ? (
               <>
-                <SignedOut>
-                  <SignInButton mode="modal">
+                <ClerkComponents.SignedOut>
+                  <ClerkComponents.SignInButton mode="modal">
                     <button className="hidden md:flex items-center gap-2 bg-white/5 hover:bg-white/10 text-white px-4 py-2 rounded-full text-sm font-medium transition-all border border-white/10 hover:border-white/20 backdrop-blur-sm">
                       로그인
                     </button>
-                  </SignInButton>
-                  <SignUpButton mode="modal">
+                  </ClerkComponents.SignInButton>
+                  <ClerkComponents.SignUpButton mode="modal">
                     <button className="hidden md:flex items-center gap-2 bg-[#2A9D8F] hover:bg-[#21867a] text-white px-4 py-2 rounded-full text-sm font-medium transition-all">
                       회원가입
                     </button>
-                  </SignUpButton>
-                </SignedOut>
-                <SignedIn>
-                  <UserButton
+                  </ClerkComponents.SignUpButton>
+                </ClerkComponents.SignedOut>
+                <ClerkComponents.SignedIn>
+                  <ClerkComponents.UserButton
                     appearance={{
                       elements: {
                         avatarBox: "w-10 h-10",
                       },
                     }}
                   />
-                </SignedIn>
+                </ClerkComponents.SignedIn>
               </>
             ) : null}
             <button
