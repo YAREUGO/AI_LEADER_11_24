@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { ClerkProvider } from "@clerk/nextjs";
 import { Analytics } from "@vercel/analytics/next";
 import { Geist, Geist_Mono } from "next/font/google";
 import type { ReactNode } from "react";
@@ -38,7 +37,7 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: ReactNode;
@@ -57,10 +56,13 @@ export default function RootLayout({
     </html>
   );
 
+  // 환경 변수가 없으면 ClerkProvider 없이 반환
   if (!publishableKey) {
     return content;
   }
 
+  // 환경 변수가 있을 때만 동적으로 ClerkProvider import
+  const { ClerkProvider } = await import("@clerk/nextjs");
   return (
     <ClerkProvider publishableKey={publishableKey}>{content}</ClerkProvider>
   );
